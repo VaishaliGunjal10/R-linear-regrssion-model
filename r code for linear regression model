@@ -1,0 +1,56 @@
+require(stats)
+require(graphics)
+#1.open dataset
+df<-longley
+#####
+#2.plot 
+pairs(df[,1:7],pch=15)
+plot(df$GNP.deflator,df$Employed)
+plot(df$GNP,df$Employed)#
+plot(df$Unemployed,df$Employed)
+plot(df$Armed.Forces,df$Employed)
+plot(df$Population,df$Employed)#
+plot(df$Year,df$Employed)#
+
+#GNP,population,year are most corelated to employed
+#3.regresson model
+library(tidyverse)
+model.GNP<-lm(Employed~GNP,data=df)
+summary(model.GNP)
+
+fit.stats1 <- as.data.frame(cbind(df$Employed,model.GNP$fitted.values)) %>%
+  rename(Actuals = V1, Predicted.Values = V2) %>%
+  mutate(error = Actuals - Predicted.Values,
+         squared.error = error^2)
+SSE1 <- sum(fit.stats1$squared.error)
+----------------------------
+model.population<-lm(Employed~Population,data=df)
+summary(model.population)
+
+fit.stats2 <- as.data.frame(cbind(df$Employed,model.population$fitted.values)) %>%
+  rename(Actuals = V1, Predicted.Values = V2) %>%
+  mutate(error = Actuals - Predicted.Values,
+         squared.error = error^2)
+SSE2 <- sum(fit.stats2$squared.error)
+-------------------------------
+model.year<-lm(Employed~Year,data=df)
+model.year
+
+fit.stats3<- as.data.frame(cbind(df$Employed,model.year$fitted.values)) %>%
+  rename(Actuals = V1, Predicted.Values = V2) %>%
+  mutate(error = Actuals - Predicted.Values,
+         squared.error = error^2)
+SSE3 <- sum(fit.stats3$squared.error)
+
+#as model.GNP has least SSE, its best
+--------------------------------
+  
+#4. model matrices
+X<-as.matrix(cbind(rep(1,length(df$GNP)),df$GNP))
+y<-df$Employed
+
+b<-solve(t(X)%*%X) %*% t(X)%*%y
+b
+
+
+sum((y-X%*%b)^2)#SSE with matrix model
